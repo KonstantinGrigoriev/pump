@@ -3,7 +3,6 @@ package pump.uno
 import akka.actor._
 import akka.routing.{FromConfig, Broadcast}
 import akka.actor.Terminated
-import dispatch.Http
 
 class Master extends Actor with ActorLogging {
 
@@ -28,7 +27,6 @@ class Master extends Actor with ActorLogging {
   }
 
   def finish() {
-    Http.shutdown()
     context.stop(self)
   }
 }

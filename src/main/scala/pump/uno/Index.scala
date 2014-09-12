@@ -1,11 +1,19 @@
 package pump.uno
 
-import akka.actor.{PoisonPill, ActorLogging, Actor}
+import java.io.{ByteArrayInputStream, InputStreamReader}
+
+import akka.actor.{Actor, ActorLogging, PoisonPill}
 import akka.routing.Broadcast
-import scala.collection.convert.WrapAsScala._
-import com.ning.http.client.Cookie
-import dispatch._, Defaults._
-import java.nio.charset.Charset
+import org.ccil.cowan.tagsoup.jaxp.SAXFactoryImpl
+import spray.client.pipelining._
+import spray.http.HttpHeaders.{Cookie, `Set-Cookie`}
+import spray.http.MediaTypes._
+import spray.http._
+import spray.httpx.unmarshalling.Unmarshaller
+
+import scala.concurrent.Future
+import scala.util.{Failure, Success}
+import scala.xml.{NodeSeq, XML}
 
 object Index {
 
@@ -18,37 +26,59 @@ class Index extends Actor with ActorLogging {
   val categoryRouter = context.actorSelection("/user/app/categoryRouter")
   val settings = Settings(context.system)
 
-  def receive = {
-    case Index.Load => {
-      val auth = login()
-      for (categories <- loadCategories(auth)) {
-        log.info(s"submitting categories...${categories.length}")
-        categories.foreach {
-          categoryLink =>
-            categoryRouter ! Category.Load(categoryLink.text,
-              categoryLink.attr("href"), auth)
-        }
-        log.info("submitting categories...Done")
+  import context.dispatcher
 
-        categoryRouter ! Broadcast(PoisonPill)
-      }
+  implicit val NodeSeqUnmarshaller =
+    Unmarshaller[NodeSeq](`text/xml`, `application/xml`, `text/html`, `application/xhtml+xml`) {
+      case HttpEntity.NonEmpty(contentType, data) ⇒
+        val parserFactory = new SAXFactoryImpl
+        XML.withSAXParser(parserFactory.newSAXParser()).load(new InputStreamReader(new ByteArrayInputStream(data.toByteArray), contentType.charset.nioCharset))
+      case HttpEntity.Empty ⇒ NodeSeq.Empty
     }
+
+  def receive = {
+    case Index.Load =>
+
+      login().flatMap {
+        cookie => {
+          loadCategories(cookie)
+        }
+      }.onComplete {
+        case Success(result) =>
+          val categories = (result \\ "div" filter (el => (el \ "@class" toString()) == "category")) \\ "h3" \\ "a"
+          log.info(s"submitting categories...${categories.length}")
+          categories.foreach {
+            categoryLink =>
+              categoryRouter ! Category.Load(categoryLink.text, categoryLink \\ "@href" toString(), null)
+          }
+          log.info("submitting categories...Done")
+
+          categoryRouter ! Broadcast(PoisonPill)
+        case Failure(exception) =>
+          log.error(exception, "error")
+      }
   }
 
-  def loadCategories(auth: Cookie) = {
-    val svc = url(settings.index).addCookie(auth)
-    Http(svc OK as.jsoup.QueryWithEncoding(settings.encoding, "div.category > h3 > a"))
+  def loadCategories(auth: HttpCookie) = {
+    val pipeline: HttpRequest => Future[NodeSeq] =
+      addHeader(Cookie(auth)) ~> sendReceive ~> unmarshal[NodeSeq]
+    pipeline(Get(settings.index))
   }
 
-  def login(): Cookie = {
-    val params = Map(
+  def login(): Future[HttpCookie] = {
+    log.info("login...")
+    val params = FormData(Seq(
       "login_username" -> settings.username,
       "login_password" -> settings.password,
       "login" -> "%C2%F5%EE%E4"
-    )
-    val svc = url(settings.login) << params
-    val response = Http(svc)
+    ))
 
-    response().getCookies.head
+    val extractCookie: HttpResponse => HttpCookie =
+      it => it.headers.collect { case `Set-Cookie`(hc) => hc}.head
+
+    val pipeline: HttpRequest => Future[HttpCookie] =
+      sendReceive ~> extractCookie
+
+    pipeline(Post(settings.login, params))
   }
 }

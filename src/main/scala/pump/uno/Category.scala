@@ -1,8 +1,7 @@
 package pump.uno
 
 import akka.actor.{ActorLogging, Actor}
-import com.ning.http.client.Cookie
-import dispatch._, Defaults._
+import spray.http.HttpHeaders.Cookie
 
 object Category {
 
@@ -19,13 +18,13 @@ class Category extends Actor with ActorLogging {
     case Category.Load(name, url, cookie) => {
       log.info(s"processing category '$name'")
       log.info(" submitting subcategories...")
-      //      for (n <- 1 to 3) subCategoryRouter ! Message("%s.%d".format(msg, n))
+//            for (n <- 1 to 3) subCategoryRouter ! Message("%s.%d".format(msg, n))
       log.info(" submitting subcategories...Done")
     }
   }
-
-  def loadSubCategories(auth: Cookie, categoryUrl:String) = {
-    val svc = (url(settings.root) / categoryUrl).addCookie(auth)
-    Http(svc OK as.jsoup.QueryWithEncoding(settings.encoding, "div.category > h3 > a"))
-  }
+//
+//  def loadSubCategories(auth: Cookie, categoryUrl:String) = {
+//    val svc = (url(settings.root) / categoryUrl).addCookie(auth)
+//    Http(svc OK as.jsoup.QueryWithEncoding(settings.encoding, "div.category > h3 > a"))
+//  }
 }
