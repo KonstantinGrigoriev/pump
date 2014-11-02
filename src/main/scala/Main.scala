@@ -1,5 +1,5 @@
 import akka.{Main => AkkaMain}
 
 object Main extends App {
-  AkkaMain.main(Array("pump.uno.Master"))
+  AkkaMain.main(Array("pump.uno.actor.MasterActor"))
 }

@@ -6,14 +6,14 @@ import pump.uno.Index
 class MasterActor extends Actor with ActorLogging {
 
   lazy val login = context.actorOf(Props[LoginActorImpl], "login")
-  lazy val index = context.actorOf(Props[Index], "index")
+  lazy val index = context.actorOf(Props[IndexActor], "index")
 
   login ! LoginActor.Login
 
   def receive = {
     case LoginActor.Success(auth) =>
-      index ! Index.Fetch(auth)
       context.watch(index)
+      index ! Index.Fetch(auth)
       context.become(waitingForFinish)
   }
 

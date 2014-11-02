@@ -15,7 +15,7 @@ trait SprayLoginServiceComponent extends LoginServiceComponent with SprayService
   class SprayLoginService extends LoginService {
 
     def login(): Future[HttpCookie] = {
-      log.debug("login...")
+      log.info("login...")
       val params = FormData(Seq(
         "login_username" -> settings.username,
         "login_password" -> settings.password,
