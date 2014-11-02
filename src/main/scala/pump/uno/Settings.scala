@@ -1,21 +1,32 @@
 package pump.uno
 
-import akka.actor.ActorSystem
-import akka.actor.Extension
-import akka.actor.ExtensionId
-import akka.actor.ExtensionIdProvider
-import akka.actor.ExtendedActorSystem
-import com.typesafe.config.{ConfigFactory, Config}
 import java.nio.charset.Charset
 
-class SettingsImpl(config: Config) extends Extension {
+import akka.actor.{ActorSystem, ExtendedActorSystem, Extension, ExtensionId, ExtensionIdProvider}
+import com.typesafe.config.Config
+
+trait Settings {
+  def root: String
+
+  def index: String
+
+  def login: String
+
+  def username: String
+
+  def password: String
+
+  def encoding: Charset
+}
+
+class SettingsImpl(config: Config) extends Extension with Settings {
   private val uno = config.getConfig("pump.uno")
-  val root: String = uno.getString("page.root")
-  val index: String = uno.getString("page.index")
-  val login: String = uno.getString("page.login")
-  val username: String = uno.getString("username")
-  val password: String = uno.getString("password")
-  val encoding: Charset = Charset.forName(uno.getString("encoding"))
+  override val root: String = uno.getString("page.root")
+  override val index: String = uno.getString("page.index")
+  override val login: String = uno.getString("page.login")
+  override val username: String = uno.getString("username")
+  override val password: String = uno.getString("password")
+  override val encoding: Charset = Charset.forName(uno.getString("encoding"))
 }
 
 object Settings extends ExtensionId[SettingsImpl] with ExtensionIdProvider {
