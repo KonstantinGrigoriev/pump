@@ -4,7 +4,7 @@ import spray.http.HttpCookie
 
 package object model {
 
-  case class Category(name: String, url: String)
+  case class Category(id: Long, name: String, url: String)
 
   case class Fetch(auth: HttpCookie)
 

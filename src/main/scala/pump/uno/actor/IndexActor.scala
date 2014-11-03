@@ -11,7 +11,7 @@ trait IndexActor extends Actor with ActorLogging with StopOnChildTermination {
 
   import context.dispatcher
 
-  lazy val categoriesActor = context.actorOf(Props[CategoriesActorImpl])
+  lazy val categoriesActor = context.actorOf(Props[CategoriesActorImpl], "categories")
 
   override def receive = {
     case Fetch(auth) =>

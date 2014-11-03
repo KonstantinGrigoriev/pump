@@ -24,7 +24,9 @@ object Unmarshallers {
       result =>
         (((result \\ "div" filter (el => (el \ "@class" toString()) == "category")) \\ "h3") \\ "a").map {
           node =>
-            Category(node.text, node \\ "@href" toString())
+            val href = node \\ "@href" toString()
+            val id = href.split('=').last.toInt
+            Category(id, node.text, href)
         }
     }
 }
