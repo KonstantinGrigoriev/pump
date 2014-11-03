@@ -3,12 +3,12 @@ package pump.util
 import java.io.{ByteArrayInputStream, InputStreamReader}
 
 import org.ccil.cowan.tagsoup.jaxp.SAXFactoryImpl
-import pump.uno.model.{Forum, Page}
+import pump.uno.model.{Forum, Page, Topic}
 import spray.http.HttpEntity
 import spray.http.MediaTypes._
 import spray.httpx.unmarshalling.Unmarshaller
 
-import scala.xml.{NodeSeq, XML}
+import scala.xml.{Node, NodeSeq, XML}
 
 object Unmarshallers {
   implicit val NodeSeqUnmarshaller =
@@ -19,23 +19,30 @@ object Unmarshallers {
       case HttpEntity.Empty ⇒ NodeSeq.Empty
     }
 
-  implicit val CategoryUnmarshaller =
+  implicit class RichNode(val xml: Node) extends AnyVal {
+    def hasClass(cls: String) = {
+      (xml \ "@class").text.split("\\s+").contains(cls)
+    }
+  }
+
+  implicit val pageUnmarshaller =
     Unmarshaller.delegate[NodeSeq, Page](`text/xml`, `application/xml`, `text/html`, `application/xhtml+xml`) {
       result =>
-        val forums = ((result \\ "h4" filter (el => (el \ "@class" toString()) == "forumlink")) \\ "a").map {
-          node =>
-            val href = node \\ "@href" toString()
-            val id = href.split('=').last.toInt
-            Forum(id, node.text, href)
-        }
-        val topics = List()
-        // TODO fix topics
-        //        val topics = (((result \\ "div" filter (el => (el \ "@class" toString()) == "torTopic")) \\ "h3") \\ "a").map {
-        //          node =>
-        //            val href = node \\ "@href" toString()
-        //            val id = href.split('=').last.toInt
-        //            Topic(id, node.text, href)
-        //        }
+        val forums = for {
+          div <- result \\ "h4" if div hasClass "forumlink"
+          anchor <- div \ "a"
+          href = anchor \\ "@href" toString()
+          id = href.split('=').last.toInt
+        } yield Forum(id, anchor.text, href)
+
+        val topics = for {
+          div <- result \\ "div" if div hasClass "torTopic"
+          anchors = div \ "a" if anchors.length > 1
+          anchor = anchors(1)
+          href = anchor \\ "@href" toString()
+          id = href.split('=').last.toInt
+        } yield Topic(id, anchor.text, href)
+
         Page(forums, topics)
     }
 }
