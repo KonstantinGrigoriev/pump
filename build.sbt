@@ -6,7 +6,7 @@ version := "0.1.0-SNAPSHOT"
 
 sbtVersion := "0.13.6"
 
-scalaVersion := "2.10.4"
+scalaVersion := "2.11.2"
 
 libraryDependencies ++= {
   val akkaV = "2.3.6"
@@ -15,9 +15,10 @@ libraryDependencies ++= {
     "com.typesafe.akka" %% "akka-slf4j" % akkaV,
     "io.spray" % "spray-client" % "1.3.1",
     "org.ccil.cowan.tagsoup" % "tagsoup" % "1.2.1",
-    "com.typesafe.scala-logging" %% "scala-logging-slf4j" % "2.1.2",
+    "org.scala-lang.modules" %% "scala-xml" % "1.0.2",
+    "com.typesafe.scala-logging" %% "scala-logging" % "3.1.0",
     "ch.qos.logback" % "logback-classic" % "1.1.2",
-    "org.scalatest" %% "scalatest" % "2.2.1" % "test",
+    "org.scalatest" %% "scalatest" % "2.2.2" % "test",
     "com.typesafe.akka" %% "akka-testkit" % akkaV % "test"
   )
 }
