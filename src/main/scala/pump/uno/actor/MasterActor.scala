@@ -1,29 +1,20 @@
 package pump.uno.actor
 
-import akka.actor.{Terminated, _}
-import pump.uno.Index
+import akka.actor._
+import pump.uno.model.Fetch
 
-class MasterActor extends Actor with ActorLogging {
+class MasterActor extends Actor with ActorLogging with StopOnChildTermination {
 
-  lazy val login = context.actorOf(Props[LoginActorImpl], "login")
-  lazy val index = context.actorOf(Props[IndexActor], "index")
+  lazy val loginActor = context.actorOf(Props[LoginActorImpl], "login")
+  lazy val indexActor = context.actorOf(Props[IndexActorImpl], "index")
 
-  login ! LoginActor.Login
+  loginActor ! LoginActor.Login
 
   def receive = {
     case LoginActor.Success(auth) =>
-      context.watch(index)
-      index ! Index.Fetch(auth)
-      context.become(waitingForFinish)
+      log.info(s"Login success ($auth) -> loading index")
+      indexActor ! Fetch(auth)
+      waitForTermination(indexActor)
   }
 
-  def waitingForFinish: Receive = {
-    case Terminated(x) if x == index =>
-      log.info(s"Actor ${x.path} terminated -> terminating Master")
-      finish()
-  }
-
-  def finish() {
-    context.stop(self)
-  }
 }
