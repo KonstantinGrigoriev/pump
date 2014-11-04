@@ -57,6 +57,32 @@ class UnmarshallersSpec extends FlatSpec with Matchers {
     page.topics should have size 2
   }
 
+  it should "parse page without pagination" in {
+    // given
+    val data = HttpEntity(`text/html`, load("/forums-and-topics.html"))
+
+    // when
+    val result = sut(data)
+
+    // then
+    result should be('right)
+    val page = result.right.get
+    page.totalPages should equal(1)
+  }
+
+  it should "parse page with pagination" in {
+    // given
+    val data = HttpEntity(`text/html`, load("/with-pagination.html"))
+
+    // when
+    val result = sut(data)
+
+    // then
+    result should be('right)
+    val page = result.right.get
+    page.totalPages should equal(344)
+  }
+
   def load(file: String) =
     Source.fromInputStream(getClass.getResourceAsStream(file)).mkString
 }

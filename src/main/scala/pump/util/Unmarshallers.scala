@@ -43,6 +43,13 @@ object Unmarshallers {
           id = href.split('=').last.toInt
         } yield Topic(id, anchor.text, href)
 
-        Page(forums, topics)
+        val pgElements = result \\ "a" filter (_.hasClass("pg"))
+        val totalPages = if (pgElements.isEmpty) {
+          1
+        } else {
+          val lastPgElement = pgElements(pgElements.length - 2)
+          lastPgElement.text.toLong
+        }
+        Page(forums, topics, totalPages)
     }
 }
