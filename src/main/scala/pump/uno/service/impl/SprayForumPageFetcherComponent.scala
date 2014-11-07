@@ -1,7 +1,7 @@
 package pump.uno.service.impl
 
 import pump.uno.model.Page
-import pump.uno.service.PageServiceComponent
+import pump.uno.service.ForumPageFetcherComponent
 import pump.util.Loggable
 import pump.util.Unmarshallers._
 import spray.client.pipelining._
@@ -10,16 +10,16 @@ import spray.http.{HttpCookie, HttpRequest}
 
 import scala.concurrent.Future
 
-trait SprayPageServiceComponent extends PageServiceComponent with SprayServiceComponent with Loggable {
+trait SprayForumPageFetcherComponent extends ForumPageFetcherComponent with SprayServiceComponent with Loggable {
 
-  override val pageService = new SprayPageService
+  override val forumPageFetcher = new SprayForumPageFetcher
 
-  class SprayPageService extends PageService {
+  class SprayForumPageFetcher extends ForumPageFetcher {
 
-    def fetchAll(auth: HttpCookie): Future[Page] = {
+    def fetch(url: String, auth: HttpCookie): Future[Page] = {
       val pipeline: HttpRequest => Future[Page] =
         addHeader(Cookie(auth)) ~> sendReceive ~> unmarshal[Page]
-      pipeline(Get(settings.index))
+      pipeline(Get(url))
     }
   }
 

@@ -12,7 +12,7 @@ package object model {
 
   case class Category(id: Long, name: String, url: String)
 
-  case class Fetch(auth: HttpCookie)
+  case class Fetch(url: String, auth: HttpCookie)
 
   case class FetchCategories(auth: HttpCookie, categories: Seq[Category])
 
