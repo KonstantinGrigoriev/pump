@@ -1,9 +1,10 @@
 package pump.uno.actor
 
-import akka.actor.{Actor, ActorLogging}
+import akka.actor.Actor
 import akka.pattern.pipe
 import pump.uno.service.LoginServiceComponent
 import pump.uno.service.impl.SprayLoginServiceComponent
+import pump.util.{ActorLogging, Loggable}
 import spray.http.HttpCookie
 
 object LoginActor {
@@ -14,7 +15,7 @@ object LoginActor {
 
 }
 
-trait LoginActor extends Actor with ActorLogging {
+trait LoginActor extends Actor with Loggable {
   this: LoginServiceComponent =>
 
   import context.dispatcher
@@ -28,4 +29,4 @@ trait LoginActor extends Actor with ActorLogging {
 
 }
 
-class LoginActorImpl extends LoginActor with SprayLoginServiceComponent
+class LoginActorImpl extends LoginActor with SprayLoginServiceComponent with ActorLogging

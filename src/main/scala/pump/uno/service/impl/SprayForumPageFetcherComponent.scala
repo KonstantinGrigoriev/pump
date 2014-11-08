@@ -1,6 +1,6 @@
 package pump.uno.service.impl
 
-import pump.uno.model.Page
+import pump.uno.model.ForumPage
 import pump.uno.service.ForumPageFetcherComponent
 import pump.util.Loggable
 import pump.util.Unmarshallers._
@@ -16,9 +16,9 @@ trait SprayForumPageFetcherComponent extends ForumPageFetcherComponent with Spra
 
   class SprayForumPageFetcher extends ForumPageFetcher {
 
-    def fetch(url: String, auth: HttpCookie): Future[Page] = {
-      val pipeline: HttpRequest => Future[Page] =
-        addHeader(Cookie(auth)) ~> sendReceive ~> unmarshal[Page]
+    def fetch(url: String, auth: HttpCookie): Future[ForumPage] = {
+      val pipeline: HttpRequest => Future[ForumPage] =
+        addHeader(Cookie(auth)) ~> sendReceive ~> unmarshal[ForumPage]
       pipeline(Get(url))
     }
   }

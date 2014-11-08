@@ -3,7 +3,7 @@ package pump.util
 import java.io.{ByteArrayInputStream, InputStreamReader}
 
 import org.ccil.cowan.tagsoup.jaxp.SAXFactoryImpl
-import pump.uno.model.{Forum, Page, Topic}
+import pump.uno.model.{Forum, ForumPage, Topic}
 import spray.http.HttpEntity
 import spray.http.MediaTypes._
 import spray.httpx.unmarshalling.Unmarshaller
@@ -26,7 +26,7 @@ object Unmarshallers {
   }
 
   implicit val pageUnmarshaller =
-    Unmarshaller.delegate[NodeSeq, Page](`text/xml`, `application/xml`, `text/html`, `application/xhtml+xml`) {
+    Unmarshaller.delegate[NodeSeq, ForumPage](`text/xml`, `application/xml`, `text/html`, `application/xhtml+xml`) {
       result =>
         val forums = for {
           div <- result \\ "h4" if div hasClass "forumlink"
@@ -50,6 +50,6 @@ object Unmarshallers {
           val lastPgElement = pgElements(pgElements.length - 2)
           lastPgElement.text.toLong
         }
-        Page(forums, topics, totalPages)
+        ForumPage(forums, topics, totalPages)
     }
 }

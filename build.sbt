@@ -13,7 +13,7 @@ libraryDependencies ++= {
   Seq(
     "com.typesafe.akka" %% "akka-actor" % akkaV,
     "com.typesafe.akka" %% "akka-slf4j" % akkaV,
-    "io.spray" % "spray-client" % "1.3.1",
+    "io.spray" %% "spray-client" % "1.3.1",
     "org.ccil.cowan.tagsoup" % "tagsoup" % "1.2.1",
     "org.scala-lang.modules" %% "scala-xml" % "1.0.2",
     "com.typesafe.scala-logging" %% "scala-logging" % "3.1.0",
