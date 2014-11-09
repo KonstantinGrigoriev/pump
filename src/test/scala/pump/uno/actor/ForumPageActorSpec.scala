@@ -19,12 +19,19 @@ class ForumPageActorSpec extends TestKit(ActorSystem("testSystem")) with FlatSpe
   trait ctx {
     val forumPageFetcherProbe = TestProbe()
     val forumPageProbes = ListBuffer[TestProbe]()
+    val topicPageProbes = ListBuffer[TestProbe]()
 
     val sut = TestActorRef[ForumPageActor](Props(new ForumPageActor with TestSettings with ActorLogging {
       override def createForumPageActor = {
         val forumPageProbe = TestProbe()
         forumPageProbes += forumPageProbe
         forumPageProbe.ref
+      }
+
+      override def createTopicPageActor = {
+        val topicPageProbe = TestProbe()
+        topicPageProbes += topicPageProbe
+        topicPageProbe.ref
       }
 
       override def createForumPageFetcherActor = forumPageFetcherProbe.ref

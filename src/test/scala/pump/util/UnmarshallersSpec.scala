@@ -8,7 +8,7 @@ import scala.io.Source
 
 class UnmarshallersSpec extends FlatSpec with Matchers {
 
-  val sut = Unmarshallers.pageUnmarshaller
+  val sut = Unmarshallers.forumPageUnmarshaller
 
   val `text/html` = MediaTypes.`text/html`.withCharset(HttpCharsets.`UTF-8`)
 

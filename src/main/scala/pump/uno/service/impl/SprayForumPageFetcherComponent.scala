@@ -17,6 +17,7 @@ trait SprayForumPageFetcherComponent extends ForumPageFetcherComponent with Spra
   class SprayForumPageFetcher extends ForumPageFetcher {
 
     def fetch(url: String, auth: HttpCookie): Future[ForumPage] = {
+      log.debug(s"Fetching FORUM from '$url'")
       val pipeline: HttpRequest => Future[ForumPage] =
         addHeader(Cookie(auth)) ~> sendReceive ~> unmarshal[ForumPage]
       pipeline(Get(url))
